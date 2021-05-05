@@ -8,8 +8,7 @@ import org.lwjgl.opengl.GL33;
 
 public class Main {
 
-    public static boolean isKeyPressed(long window, int key)
-    {
+    public static boolean isKeyPressed(long window, int key) {
         return (GLFW.glfwGetKey(window, key) == GLFW.GLFW_TRUE);
     }
 
@@ -29,27 +28,43 @@ public class Main {
                 -1.0;0.6;0.4
                 -0.6;0.6;0.4
                 -0.19999999;0.6;0.4""";
+        String sources = """
+                 -0.19999999;-0.19999999;0.4
+                """;
         Maze maze = new Maze(source);
         for (Square square : maze.getBody()) {
             square.init();
         }
-        Square player = new Square(0,0,0.4f);
+
+        Square player = new Square(0, 0, 0.1f);
 
         player.init();
+        float playerMovementSpeed = 0.0002f;
+        int checkObject = 6;
         while (!GLFW.glfwWindowShouldClose(window)) {
-            GL33.glClearColor(0f, 0f, 0f, 1f);
+            GL33.glClearColor(1f, 1f, 1f, 1f);
             GL33.glClear(GL33.GL_COLOR_BUFFER_BIT);
 
-            if (isKeyPressed(window, GLFW.GLFW_KEY_W)){
-                player.setY(player.getY() + 0.0001f);
-                System.out.println(player.getX() +", " + player.getY());
-                player.update();
+            if (isKeyPressed(window, GLFW.GLFW_KEY_UP)) {
+                player.setY(player.getY() + playerMovementSpeed);
+            }
+            if (isKeyPressed(window, GLFW.GLFW_KEY_LEFT)) {
+                player.setX(player.getX() - playerMovementSpeed);
+            }
+            if (isKeyPressed(window, GLFW.GLFW_KEY_DOWN)) {
+                player.setY(player.getY() - playerMovementSpeed);
+            }
+            if (isKeyPressed(window, GLFW.GLFW_KEY_RIGHT)) {
+                player.setX(player.getX() + playerMovementSpeed);
             }
 
+            player.update();
+            player.render(true);
 
-            player.render();
             for (Square square : maze.getBody()) {
-                square.render();
+                square.render(false);
+                if (player.colides(square))
+                    System.out.println("Colision!");
             }
 
 

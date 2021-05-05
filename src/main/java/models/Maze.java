@@ -8,7 +8,6 @@ import java.util.Random;
 public class Maze {
     private final Square[] body;
     public Maze(String source) {
-        //TODO redo this for use of squares
         String[] rawRows = source.split("\n");
         this.body = new Square[rawRows.length];
         for (int i = 0; i < rawRows.length; i++) {

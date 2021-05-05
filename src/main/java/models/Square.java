@@ -12,14 +12,13 @@ public class Square {
             0, 1, 3,
             1, 2, 3
     };
-    private final float[] verticies;
-
+    private final int vaoId;
+    private final int vboId;
+    private final int eboId;
+    private final float sideSize;
+    private float[] verticies;
     private float x;
     private float y;
-    private int vaoId;
-    private int vboId;
-    private int eboId;
-    private float sideSize;
 
     public Square(float x, float y, float sideSize) {
         this.vaoId = GL33.glGenVertexArrays();
@@ -28,28 +27,7 @@ public class Square {
         this.sideSize = sideSize;
         this.x = x;
         this.y = y;
-        /*
-        this.verticies = new float[]{
-                x + sideSize, y + sideSize  , 0.0f, // 0 -> Top right
-                x + sideSize, y             , 0.0f, // 1 -> Bottom right
-                x           , y             , 0.0f, // 2 -> Bottom left
-                x           , y + sideSize  , 0.0f, // 3 -> Top left
-        };*/
-
-        this.verticies = new float[]{
-                x + sideSize, - y - sideSize  , 0.0f, // 0 -> Top right
-                x + sideSize, - y             , 0.0f, // 1 -> Bottom right
-                x           , - y             , 0.0f, // 2 -> Bottom left
-                x           , - y - sideSize  , 0.0f, // 3 -> Top left
-        };
-    }
-
-    public float getSideSize() {
-        return sideSize;
-    }
-
-    public void setSideSize(float sideSize) {
-        this.sideSize = sideSize;
+        this.verticies = vertsFromCoor(x, y, sideSize);
     }
 
     public float getX() {
@@ -68,49 +46,50 @@ public class Square {
         this.y = y;
     }
 
-    public int getVaoId() {
-        return vaoId;
-    }
+    public void render(boolean shader) {
+        if (shader)
+            GL33.glUseProgram(Shaders.shaderProgramId);
 
-    public void setVaoId(int vaoId) {
-        this.vaoId = vaoId;
-    }
-
-    public int getVboId() {
-        return vboId;
-    }
-
-    public void setVboId(int vboId) {
-        this.vboId = vboId;
-    }
-
-    public int getEboId() {
-        return eboId;
-    }
-
-    public void setEboId(int eboId) {
-        this.eboId = eboId;
-    }
-
-    public void render() {
-        GL33.glUseProgram(Shaders.shaderProgramId);
+        // Draw using the glDrawElements function
         GL33.glBindVertexArray(this.vaoId);
         GL33.glDrawElements(GL33.GL_TRIANGLES, indices.length, GL33.GL_UNSIGNED_INT, 0);
     }
 
-    public void update() {
-        FloatBuffer fb = BufferUtils.createFloatBuffer(this.verticies.length)
-                .put(verticies)
-                .flip();
+    public float[] vertsFromCoor(float x, float y, float sideSize) {
+        return new float[]{
+                x + sideSize, y + sideSize, 0.0f, // 0 -> Top right
+                x + sideSize, y, 0.0f, // 1 -> Bottom right
+                x, y, 0.0f, // 2 -> Bottom left
+                x, y + sideSize, 0.0f, // 3 -> Top left
+        };
 
-        MemoryUtil.memFree(fb);
     }
 
-    public void init() {
-        //Shaders.initShaders();
-        //int colorLoc = GL33.glGetUniformLocation(Shaders.shaderProgramId, "outColor");
+    public void update() {
+        float[] newVerts = vertsFromCoor(this.x, this.y, this.sideSize);
+        this.verticies = newVerts;
+        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, vboId);
+        GL33.glBufferSubData(GL33.GL_ARRAY_BUFFER, 0, newVerts);
+        GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, 0); // 0 idea what this does but ok
+    }
 
+    private boolean isBetween(float toCompare, float smaller, float bigger) {
+        return ((smaller <= toCompare) && (toCompare <= bigger));
+    }
 
+    public boolean colides(Square square) {
+        float maxAcceptX = square.x + square.sideSize;
+        float maxAcceptY = square.y + square.sideSize;
+        float minAcceptX = square.x;
+        float minAcceptY = square.y;
+
+        return isBetween(this.x, minAcceptX, maxAcceptX) && isBetween(this.y, minAcceptY, maxAcceptY) ||
+                isBetween(this.x + this.sideSize, minAcceptX, maxAcceptX) && isBetween(this.y, minAcceptY, maxAcceptY) ||
+                isBetween(this.x, minAcceptX, maxAcceptX) && isBetween(this.y + this.sideSize, minAcceptY, maxAcceptY) ||
+                isBetween(this.x + this.sideSize, minAcceptX, maxAcceptX) && isBetween(this.y + this.sideSize, minAcceptY, maxAcceptY);
+    }
+
+    public void rawInit() {
         GL33.glBindVertexArray(this.vaoId);
         GL33.glBindBuffer(GL33.GL_ELEMENT_ARRAY_BUFFER, this.eboId);
         IntBuffer ib = BufferUtils.createIntBuffer(this.indices.length)
@@ -130,10 +109,18 @@ public class Square {
         GL33.glEnableVertexAttribArray(0);
 
         MemoryUtil.memFree(fb);
+
+    }
+
+    public void init() {
+        Shaders.initShaders();
+        int colorLoc = GL33.glGetUniformLocation(Shaders.shaderProgramId, "inColor");
+
+        rawInit();
         // Change to Color...
         // Tell OpenGL we are currently writing to this buffer (colorsId)
-       // GL33.glUseProgram(Shaders.shaderProgramId);
-       // GL33.glUniform3f(colorLoc, 1.0f, 1.0f, 0.0f);
+        GL33.glUseProgram(Shaders.shaderProgramId);
+        GL33.glUniform3f(colorLoc, 0.1f, 0.5f, 0.6f);
     }
 
 
