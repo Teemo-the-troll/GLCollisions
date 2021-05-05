@@ -56,12 +56,22 @@ public class Square {
     }
 
     public float[] vertsFromCoor(float x, float y, float sideSize) {
+        //TODO remove the - at Y to revert changes
         return new float[]{
+                x + sideSize, -y, 0.0f, // 0 -> Top right
+                x + sideSize, -y -sideSize, 0.0f, // 1 -> Bottom right
+                x, -y - sideSize, 0.0f, // 2 -> Bottom left
+                x, -y , 0.0f, // 3 -> Top left
+        };
+
+        /*
+        * return new float[]{
                 x + sideSize, y + sideSize, 0.0f, // 0 -> Top right
                 x + sideSize, y, 0.0f, // 1 -> Bottom right
                 x, y, 0.0f, // 2 -> Bottom left
                 x, y + sideSize, 0.0f, // 3 -> Top left
         };
+*/
 
     }
 

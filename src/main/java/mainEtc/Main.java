@@ -45,16 +45,16 @@ public class Main {
             GL33.glClearColor(1f, 1f, 1f, 1f);
             GL33.glClear(GL33.GL_COLOR_BUFFER_BIT);
 
-            if (isKeyPressed(window, GLFW.GLFW_KEY_UP)) {
-                player.setY(player.getY() + playerMovementSpeed);
-            }
-            if (isKeyPressed(window, GLFW.GLFW_KEY_LEFT)) {
-                player.setX(player.getX() - playerMovementSpeed);
-            }
-            if (isKeyPressed(window, GLFW.GLFW_KEY_DOWN)) {
+            if (isKeyPressed(window, GLFW.GLFW_KEY_UP) || isKeyPressed(window, GLFW.GLFW_KEY_W)) {
                 player.setY(player.getY() - playerMovementSpeed);
             }
-            if (isKeyPressed(window, GLFW.GLFW_KEY_RIGHT)) {
+            if (isKeyPressed(window, GLFW.GLFW_KEY_LEFT) || isKeyPressed(window, GLFW.GLFW_KEY_A)) {
+                player.setX(player.getX() - playerMovementSpeed);
+            }
+            if (isKeyPressed(window, GLFW.GLFW_KEY_DOWN) || isKeyPressed(window, GLFW.GLFW_KEY_S)) {
+                player.setY(player.getY() + playerMovementSpeed);
+            }
+            if (isKeyPressed(window, GLFW.GLFW_KEY_RIGHT) || isKeyPressed(window, GLFW.GLFW_KEY_D)) {
                 player.setX(player.getX() + playerMovementSpeed);
             }
 
